@@ -49,6 +49,9 @@ async def _make_internal_api_request(
     
     url = f"{BACKEND_API_BASE_URL}{endpoint}"
     
+    if len(INTERNAL_API_KEY) > 0:
+        logger.info(len(INTERNAL_API_KEY))
+    
     # Set default headers for internal API calls
     default_headers = {
         "Content-Type": "application/json",
