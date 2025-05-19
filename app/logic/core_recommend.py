@@ -17,30 +17,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-async def generate_recommendations(user_id: str, limit: int = 5) -> Dict[str, List[Dict[str, Any]]]:
-    """
-    Generate personalized recommendations for a user
-    
-    Args:
-        user_id: The ID of the user to generate recommendations for
-        limit: The maximum number of recommendations to return
-        
-    Returns:
-        A dictionary containing the recommended tests and lectures
-    """
-    logger.info(f"Generating recommendations for user {user_id}")
-    
-    # Get user profile data
-    user_profile = await data_fetcher.get_user_profile(user_id)
-    
-    # If user has no history, use cold start recommendations
-    if is_cold_start_user(user_profile):
-        logger.info(f"Using cold start recommendations for user {user_id}")
-        return await generate_cold_start_recommendations(user_profile, limit)
-    
-    # Use the hybrid recommendation approach for users with history
-    return await recommend_hybrid(user_id, limit)
-
 def is_cold_start_user(user_profile: Dict[str, Any]) -> bool:
     """
     Determine if this is a cold start user (new user with little history)
@@ -69,30 +45,6 @@ def is_cold_start_user(user_profile: Dict[str, Any]) -> bool:
     # Consider it a cold start if the user has less than 2 tests in history
     # and has started less than 3 lectures
     return len(test_history) < 2 and len(learning_progress) < 3
-
-async def generate_cold_start_recommendations(user_profile: Dict[str, Any], limit: int = 5) -> Dict[str, List[Dict[str, Any]]]:
-    """
-    Generate recommendations for new users with little history
-    
-    Args:
-        user_profile: The user profile data
-        limit: The maximum number of recommendations to generate
-        
-    Returns:
-        A dictionary containing the recommended tests and lectures
-    """
-    # Get test and lecture candidates
-    test_candidates = await data_fetcher.get_test_candidates()
-    lecture_candidates = await data_fetcher.get_lecture_candidates()
-    
-    # Use cold start recommendation logic
-    recommended_tests = await recommend_cold_start_tests(user_profile, test_candidates, limit)
-    recommended_lectures = await recommend_cold_start_lectures(user_profile, lecture_candidates, limit)
-    
-    return {
-        "tests": recommended_tests,
-        "lectures": recommended_lectures
-    }
 
 async def recommend_hybrid(user_profile: Dict[str, Any], limit: int = 5, margin: int = TARGET_MARGIN) -> Dict[str, List[Dict[str, Any]]]:
     """
@@ -179,6 +131,7 @@ async def recommend_hybrid(user_profile: Dict[str, Any], limit: int = 5, margin:
             
             scored_tests.append({
                 "id": test_label,
+                "name": test.get("name"),
                 "score": score,
                 "already_taken": already_taken,
                 "attempts": attempts,
@@ -223,6 +176,7 @@ async def recommend_hybrid(user_profile: Dict[str, Any], limit: int = 5, margin:
         
         scored_lectures.append({
             "id": lecture_label,
+            "name": lecture.get("name"),
             "score": score,
             "already_learned": already_learned,
             "completion": completion_percent,
@@ -255,6 +209,7 @@ async def recommend_hybrid(user_profile: Dict[str, Any], limit: int = 5, margin:
 
         test_recommendations.append({
             "id": rec.get("id", ""),
+            "name": rec.get("name"),
             "score": rec.get("score", 0),
             "explanation": explanation,
             "testId": rec.get("testId", "")
@@ -274,6 +229,7 @@ async def recommend_hybrid(user_profile: Dict[str, Any], limit: int = 5, margin:
 
         lecture_recommendations.append({
             "id": rec.get("id", ""),
+            "name": rec.get("name", ""),
             "score": rec.get("score", 0),
             "explanation": explanation,
             "lectureId": rec.get("lectureId", "")

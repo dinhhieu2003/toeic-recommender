@@ -7,7 +7,7 @@ import logging
 from pydantic import BaseModel
 
 from app.logic import data_fetcher
-from app.logic.core_recommend import recommend_hybrid
+from app.logic.core_recommend import recommend_hybrid, is_cold_start_user
 from app.logic.cold_start import generate_cold_start_recommendations
 
 # Configure logging
@@ -69,10 +69,7 @@ async def get_recommendations(
         user_profile = user_profile_api_response.get('data', {})
         logger.info(f"Success get user profile id {user_id}")
         # Check if this is a cold start user (no history)
-        is_cold_start = (
-            not user_profile.get('testHistory') and 
-            not user_profile.get('learningProgress')
-        )
+        is_cold_start = is_cold_start_user(user_profile)
         
         if is_cold_start:
             logger.info(f"Using cold start recommendations for new user: {user_id}")
