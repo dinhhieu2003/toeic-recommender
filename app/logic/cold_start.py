@@ -44,6 +44,7 @@ async def generate_cold_start_recommendations(user_profile: Dict[str, Any], limi
 
             test_recommendations.append({
                 "id": rec.get("id", ""),
+                "name": rec.get("name", ""),
                 "score": rec.get("score", 0),
                 "explanation": explanation,
                 "testId": rec.get("testId", "")
@@ -60,6 +61,7 @@ async def generate_cold_start_recommendations(user_profile: Dict[str, Any], limi
 
             lecture_recommendations.append({
                 "id": rec.get("id", ""),
+                "name": rec.get("name", ""),
                 "score": rec.get("score", 0),
                 "explanation": explanation,
                 "lectureId": rec.get("lectureId", "")
@@ -116,6 +118,7 @@ async def recommend_cold_start_tests(user_profile: Dict[str, Any],
         
         scored_tests.append({
             "id": test["testId"],
+            "name": test["name"],
             "score": combined_score,
             "already_taken": False,
             "attempts": 0,
@@ -161,7 +164,7 @@ async def recommend_cold_start_lectures(user_profile: Dict[str, Any],
         # Add a basic score (could be enhanced with more sophisticated logic)
         scored_lectures.append({
             "id": lecture["lectureId"],
-            # Placeholder, could use recency or other factors
+            "name": lecture["name"],
             "score": 1.0,
             "already_learned": False,
             "completion": 0,
@@ -171,63 +174,3 @@ async def recommend_cold_start_lectures(user_profile: Dict[str, Any],
     
     # Return top N recommendations
     return scored_lectures[:limit]
-
-# async def get_cold_start_recommendations(top_n_test: int = 3, top_n_lecture: int = 3) -> Dict[str, List[str]]:
-#     """
-#     Get simplified cold start recommendations based on popularity and recency.
-    
-#     This function provides basic recommendations for completely new users without any profile data.
-#     It recommends the most popular tests and most recent lectures.
-    
-#     Args:
-#         top_n_test: Number of test recommendations to return
-#         top_n_lecture: Number of lecture recommendations to return
-        
-#     Returns:
-#         Dictionary with recommended test and lecture IDs
-#     """
-#     logger.info("Generating simplified cold start recommendations based on popularity and recency")
-    
-#     recommended_tests = []
-#     recommended_lectures = []
-    
-#     try:
-#         # Fetch test candidates and sort by popularity
-#         test_candidates = await data_fetcher.get_test_candidates()
-#         if test_candidates:
-#             # Sort by totalUserAttempt (popularity) in descending order
-#             sorted_tests = sorted(
-#                 test_candidates, 
-#                 key=lambda test: test.get("totalUserAttempt", 0), 
-#                 reverse=True
-#             )
-#             # Extract top N test IDs
-#             recommended_tests = [test.get("testId") for test in sorted_tests[:top_n_test]]
-#             logger.info(f"Selected {len(recommended_tests)} popular tests for cold start recommendations")
-#         else:
-#             logger.warning("No test candidates available for cold start recommendations")
-#     except Exception as e:
-#         logger.error(f"Error fetching test candidates for cold start: {str(e)}")
-    
-#     try:
-#         # Fetch lecture candidates and sort by creation date
-#         lecture_candidates = await data_fetcher.get_lecture_candidates()
-#         if lecture_candidates:
-#             # Sort by createdAt (recency) in descending order 
-#             sorted_lectures = sorted(
-#                 lecture_candidates,
-#                 key=lambda lecture: lecture.get("createdAt", ""), 
-#                 reverse=True
-#             )
-#             # Extract top N lecture IDs
-#             recommended_lectures = [lecture.get("lectureId") for lecture in sorted_lectures[:top_n_lecture]]
-#             logger.info(f"Selected {len(recommended_lectures)} recent lectures for cold start recommendations")
-#         else:
-#             logger.warning("No lecture candidates available for cold start recommendations")
-#     except Exception as e:
-#         logger.error(f"Error fetching lecture candidates for cold start: {str(e)}")
-    
-#     return {
-#         "recommended_tests": recommended_tests,
-#         "recommended_lectures": recommended_lectures
-#     } 
