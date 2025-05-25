@@ -444,7 +444,6 @@ def score_candidate(
     topics = candidate.get("topics", [])
     if isinstance(topics, list):
         for topic in topics:
-            logger.info(f"Hello guys")
             total_deficiency += get_topic_deficiency(topic, user_profile.get("topicStats", []))
     # Select base difficulty
     if user_profile.get("averageTotalScore", 0) < user_profile.get("target", 0):
