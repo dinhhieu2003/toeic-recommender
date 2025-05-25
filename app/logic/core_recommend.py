@@ -98,7 +98,6 @@ async def recommend_hybrid(user_profile: Dict[str, Any], limit: int = 5, margin:
         # Allow tests that are slightly below the user's current score
         avg_total_score = user_profile.get("averageTotalScore", 0)
         test_difficulty = test.get("difficulty", 0)
-        
         if test_difficulty >= avg_total_score - 20:
             score = score_candidate(
                 user_profile, 
@@ -187,7 +186,6 @@ async def recommend_hybrid(user_profile: Dict[str, Any], limit: int = 5, margin:
     # Sort and select top recommendations
     recommended_tests = sorted(scored_tests, key=lambda x: x["score"], reverse=True)[:limit]
     recommended_lectures = sorted(scored_lectures, key=lambda x: x["score"], reverse=True)[:limit]
-    
     # Format output with detailed explanation
     test_recommendations = []
     for rec in recommended_tests:
@@ -261,8 +259,7 @@ def get_topic_deficiency(topic: str, topic_stats: List[Dict[str, Any]], desired_
     for item in topic_stats:
         if not isinstance(item, dict):
             continue
-            
-        if item.get("Topic").get("name") == topic:
+        if item.get("topicName", "") == topic:
             total_correct = item.get("totalCorrect", 0)
             total_incorrect = item.get("totalIncorrect", 0)
             total = total_correct + total_incorrect
@@ -439,7 +436,6 @@ def score_candidate(
         candidate_id = candidate.get("testId", candidate.get("id", ""))
     else:
         candidate_id = candidate.get("lectureId", candidate.get("id", ""))
-    
     if not candidate_id:
         logger.warning(f"Could not determine candidate ID for {candidate_type}")
         return 0.0
@@ -448,8 +444,8 @@ def score_candidate(
     topics = candidate.get("topics", [])
     if isinstance(topics, list):
         for topic in topics:
+            logger.info(f"Hello guys")
             total_deficiency += get_topic_deficiency(topic, user_profile.get("topicStats", []))
-
     # Select base difficulty
     if user_profile.get("averageTotalScore", 0) < user_profile.get("target", 0):
         base_difficulty = user_profile.get("averageTotalScore", 0)
